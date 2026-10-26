@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>صيدليتي | My Pharmacy</title>
+<meta name="theme-color" content="#087f68"><meta name="description" content="لعبة تعليمية لمحاكاة قرارات الصيدلي وإدارة مخزون الصيدلية.">
+<style>
+:root{--bg:#f4f7f6;--card:#fff;--tx:#17302b;--mu:#5d7570;--ac:#0f8b6d;--ok:#1b8a3b;--wa:#c98a00;--no:#c0392b;--bd:#d9e4e1;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1b19;--card:#172724;--tx:#e6f1ee;--mu:#93aca6;--ac:#2fc29d;--ok:#4cd07a;--wa:#f0b429;--no:#ff7a6b;--bd:#27403b}}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;line-height:1.7;padding-bottom:76px}
+.top{position:sticky;top:0;background:var(--ac);color:#fff;padding:8px 12px;display:flex;justify-content:space-between;gap:6px;font-size:13px;z-index:5;flex-wrap:wrap}
+.top b{font-size:14px}
+main{padding:12px;max-width:640px;margin:auto}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px}
+h2,h3{margin:0 0 8px}h2{font-size:18px}h3{font-size:15px}
+.tag{display:inline-block;background:var(--ac);color:#fff;border-radius:20px;padding:0 10px;font-size:12px;margin-left:6px}
+button{font:inherit;cursor:pointer}
+.opt{display:block;width:100%;text-align:right;background:var(--card);color:var(--tx);border:1.5px solid var(--bd);border-radius:12px;padding:11px;margin:8px 0}
+.opt:disabled{opacity:.45}
+.btn{background:var(--ac);color:#fff;border:0;border-radius:12px;padding:10px 16px}
+.btn.s{padding:4px 10px;font-size:13px;border-radius:8px}
+.btn.g{background:transparent;color:var(--no);border:1px solid var(--no)}
+.fb{border-radius:10px;padding:9px;margin:7px 0;font-size:14px;border:1.5px solid var(--bd)}
+.fb.best{border-color:var(--ok)}.fb.mid{border-color:var(--wa)}.fb.bad{border-color:var(--no)}
+.pick{outline:3px solid var(--ac)}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--card);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav button{flex:1;background:none;border:0;color:var(--mu);padding:9px 2px;font-size:12px}
+nav button.on{color:var(--ac);font-weight:700}
+nav span{display:block;font-size:20px}
+input{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx);margin-bottom:10px}
+details{border-top:1px solid var(--bd);padding:6px 0}summary{cursor:pointer;font-weight:600}
+.r{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--bd);font-size:14px}
+.bar{height:9px;background:var(--bd);border-radius:9px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ac)}
+.mu{color:var(--mu);font-size:13px}.red{color:var(--no)}
+.dl dt{font-weight:700;color:var(--ac);font-size:13px;margin-top:6px}.dl dd{margin:0}
+
+/* My Pharmacy v2 enhancements */
+:root{--ac:#087f68}
+body{background:radial-gradient(circle at top right,rgba(15,139,109,.08),transparent 35%),var(--bg)}
+.card{box-shadow:0 5px 18px rgba(10,50,40,.045);transition:transform .18s ease,box-shadow .18s ease}
+.card:focus-within,.card:hover{box-shadow:0 8px 22px rgba(10,50,40,.08)}
+.opt{transition:transform .12s ease,border-color .12s ease,background .12s ease}
+.opt:active,.btn:active{transform:scale(.985)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--wa);outline-offset:2px}
+.top{align-items:center;box-shadow:0 3px 12px rgba(0,0,0,.08)}
+.top-tools{display:flex;align-items:center;gap:6px;width:100%;justify-content:flex-end}
+.top-tools button{border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.13);color:white;border-radius:9px;padding:4px 9px;font-size:12px}
+.toast{position:fixed;top:70px;left:12px;right:12px;margin:auto;max-width:420px;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 14px;z-index:20;box-shadow:0 8px 24px #0002;display:none}
+@media(min-width:600px){main{padding:18px}.card{padding:18px}}
+
+</style>
+</head>
+<body>
+<div class="top" id="top"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div><main id="app"></main>
+<nav id="nav"></nav>
+<script>
+var D=[
+{id:"para",n:"باراسيتامول (Paracetamol)",t:"بانادول، أدول، بنادول",c:"مسكّن وخافض حرارة",u:"الصداع، الألم الخفيف إلى المتوسط، الحمى",x:"فشل الكبد الشديد، الحساسية للدواء",s:"نادرة بالجرعات العلاجية؛ الجرعة الزائدة تسمّم الكبد",i:"الكحول والاستخدام المزمن بجرعات عالية يزيدان خطر تضرر الكبد؛ قد يرفع INR مع الوارفارين عند الاستعمال المنتظم",d:"البالغ: 500–1000 ملغ كل 4–6 ساعات، الحد الأقصى 4 غ/يوم (يفضّل أقل عند كبار السن). الأطفال: 10–15 ملغ/كغ كل 4–6 ساعات، بحد أقصى 5 جرعات/يوم",cost:3,pr:6},
+{id:"ibu",n:"إيبوبروفين (Ibuprofen)",t:"بروفين، أدفيل، بروفينال",c:"مضاد التهاب لاستيرويدي (NSAID)",u:"ألم، التهاب، حمى",x:"قرحة المعدة/نزف هضمي، الربو الحساس للأسبرين، الفشل الكلوي، الحمل (خاصة الثلث الأخير)",s:"عسر هضم، قرحة ونزف، ارتفاع الضغط، تأثير على الكلى",i:"الوارفارين والأسبرين (نزف)، أدوية الضغط (تقلل مفعولها)، الميتفورمين مع اعتلال الكلى",d:"البالغ: 200–400 ملغ كل 6–8 ساعات مع الأكل، الحد الأقصى بدون وصفة 1.2 غ/يوم. الأطفال (فوق 6 أشهر): 5–10 ملغ/كغ كل 6–8 ساعات",cost:4,pr:8},
+{id:"omep",n:"أوميبرازول (Omeprazole)",t:"لوسيك، أوميز",c:"مثبّط مضخة البروتون (PPI)",u:"الارتجاع، القرحة، حموضة متكررة",x:"الحساسية للدواء",s:"صداع، إسهال، نقص المغنيسيوم والـ B12 مع الاستعمال الطويل",i:"كلوبيدوغريل (يقلل فعاليته)، يقلل امتصاص بعض الأدوية الحمضية",d:"البالغ: 20 ملغ مرة يومياً قبل الفطور بنصف ساعة؛ بدون وصفة لا يزيد عن 14 يوماً",cost:6,pr:12},
+{id:"antac",n:"هيدروكسيد الألمنيوم والمغنيسيوم (Antacid)",t:"ماالوكس، جافيسكون",c:"مضاد حموضة",u:"حرقة المعدة والحموضة العرضية",x:"الفشل الكلوي الشديد",s:"إسهال (المغنيسيوم) أو إمساك (الألمنيوم)",i:"يقلل امتصاص أدوية كثيرة: يُفصل عنها ساعتين",d:"البالغ: 1–2 قرص مضغ أو 10–20 مل بعد الأكل وعند اللزوم، وقبل النوم",cost:2,pr:5},
+{id:"dxm",n:"ديكستروميثورفان (Dextromethorphan)",t:"توسيلون دي إم، بنادريل للسعال",c:"مثبّط سعال مركزي",u:"السعال الجاف المزعج",x:"السعال المصحوب ببلغم، الربو الحاد، مع مثبطات MAO، الأطفال دون 4 سنوات",s:"نعاس، دوار، غثيان",i:"مثبطات MAO وSSRIs (متلازمة السيروتونين)",d:"البالغ: 10–20 ملغ كل 4 ساعات أو 30 ملغ كل 6–8 ساعات، الحد الأقصى 120 ملغ/يوم",cost:4,pr:9},
+{id:"guai",n:"غوايفينيسين (Guaifenesin)",t:"موكوسول، شراب البلغم",c:"مقشّع",u:"السعال المنتج للبلغم",x:"الحساسية للدواء",s:"غثيان، نعاس بسيط",i:"قليلة",d:"البالغ: 200–400 ملغ كل 4 ساعات مع كثرة السوائل",cost:3,pr:7},
+{id:"amox",n:"أموكسيسيلين (Amoxicillin)",t:"أموكسيل، أوغمنتين (مع كلافولانيك)",c:"مضاد حيوي بنسيليني",u:"التهابات بكتيرية يشخصها الطبيب (بوصفة فقط)",x:"الحساسية للبنسلين والسيفالوسبورينات",s:"إسهال، طفح، صدمة تأقية عند الحساسية",i:"الميثوتريكسات، الوارفارين (قد يرفع INR)",d:"البالغ: 500 ملغ كل 8 ساعات. الأطفال: 25–50 ملغ/كغ/يوم مقسمة، حسب الطبيب",cost:8,pr:16},
+{id:"asa",n:"أسبرين (Aspirin)",t:"أسبوكيد، كارديو أسبرين",c:"NSAID ومضاد صفيحات",u:"ألم، حمى، وقاية قلبية (جرعة منخفضة بأمر الطبيب)",x:"الأطفال تحت 16 سنة (متلازمة راي)، القرحة، الربو الحساس، الحمل، مع الوارفارين",s:"نزف هضمي، تهيج المعدة",i:"الوارفارين والـ NSAIDs (نزف)، الميتوتريكسات",d:"البالغ كمسكّن: 300–650 ملغ كل 4–6 ساعات؛ للقلب 75–100 ملغ يومياً بأمر الطبيب",cost:3,pr:7},
+{id:"diclo",n:"ديكلوفيناك (Diclofenac)",t:"فولتارين، ديكلوفين",c:"NSAID",u:"آلام العضلات والمفاصل والالتهاب",x:"القرحة، أمراض القلب الشديدة، الفشل الكلوي، الربو الحساس",s:"عسر هضم، نزف، رفع الضغط، خطر قلبي وعائي",i:"الوارفارين، أدوية الضغط، الليثيوم",d:"البالغ: 50 ملغ مرتين إلى ثلاث مرات يومياً بعد الأكل لأقصر مدة ممكنة",cost:5,pr:11},
+{id:"ors",n:"أملاح الإماهة الفموية (ORS)",t:"أورال ساليت، ريهيدرات",c:"محلول معالج للجفاف",u:"الإسهال والقيء وتعويض السوائل والأملاح",x:"انسداد الأمعاء، القيء المستمر الشديد، الجفاف الشديد (يحتاج وريدي)",s:"قيء خفيف إن شُرب بسرعة",i:"قليلة",d:"يُحضّر بالماء حسب العبوة. الأطفال: رشفات صغيرة متكررة، تقريباً 50–100 مل/كغ خلال 4 ساعات للجفاف الخفيف",cost:1,pr:3},
+{id:"warf",n:"وارفارين (Warfarin)",t:"كومادين",c:"مضاد تخثر",u:"منع الجلطات (بوصفة ومتابعة INR)",x:"النزف الفعال، الحمل",s:"نزف",i:"NSAIDs والأسبرين والمضادات الحيوية والكحول وكثير غيرها",d:"فردية حسب INR، يحددها الطبيب فقط",cost:6,pr:12},
+{id:"metf",n:"ميتفورمين (Metformin)",t:"غلوكوفاج",c:"خافض سكر (بيغوانيد)",u:"السكري النوع الثاني",x:"الفشل الكلوي الشديد، الحماض، قبل التصوير بالصبغة",s:"غثيان، إسهال، نقص B12",i:"الكحول، الصبغات الظليلة، NSAIDs مع تضرر الكلى",d:"البدء: 500 ملغ مرتين يومياً مع الأكل، يرفعها الطبيب تدريجياً",cost:4,pr:9}
+];
+var C=[
+{l:1,k:"صداع",p:"رجل عمره 30 سنة، صحي تماماً وبلا حساسية، عنده صداع توتري بعد يوم عمل طويل ويطلب مسكّناً.",o:[["باراسيتامول 500 ملغ","para",2,"الخيار الأمن والأنسب لصداع بسيط عند شخص سليم."],["إيبوبروفين 400 ملغ مع الأكل","ibu",1,"مقبول وفعّال، لكن الباراسيتامول أقل ضرراً على المعدة والكلى."],["أموكسيسيلين","amox",0,"مضاد حيوي لا علاقة له بالصداع، ويحتاج وصفة."],["غوايفينيسين","guai",0,"مقشّع للبلغم ولا يسكّن الصداع."]]},
+{l:1,k:"حموضة",p:"سيدة 35 سنة، حرقة بعد الوجبات منذ يومين، بلا أعراض خطيرة (لا قيء دموي ولا نزول وزن ولا صعوبة بلع).",o:[["مضاد حموضة بعد الأكل","antac",2,"سريع المفعول وكافٍ للحرقة العرضية."],["أوميبرازول 20 ملغ قبل الفطور","omep",1,"مقبول، لكنه أبطأ بداية ويُحجز للحموضة المتكررة."],["إيبوبروفين","ibu",0,"يهيّج المعدة ويزيد الحرقة."],["أسبرين","asa",0,"يهيّج المعدة ويزيد خطر النزف."]]},
+{l:1,k:"سعال جاف",p:"شاب 25 سنة، سعال جاف مزعج يمنعه من النوم منذ 3 أيام، بلا حرارة ولا ضيق نفس، ولا يتناول أدوية.",o:[["ديكستروميثورفان","dxm",2,"مثبط سعال مناسب للسعال الجاف المزعج."],["غوايفينيسين","guai",0,"مقشّع يفيد مع البلغم لا السعال الجاف."],["أموكسيسيلين","amox",0,"أغلب السعال فيروسي والمضاد لا يفيده."],["باراسيتامول","para",0,"لا يعالج السعال."]]},
+{l:1,k:"سعال ببلغم",p:"سيدة 40 سنة، سعال برطوبة وبلغم أبيض منذ 4 أيام، مع زكام خفيف وبلا حرارة.",o:[["غوايفينيسين مع سوائل","guai",2,"المقشّع يسهّل طرد البلغم، والسعال المنتج مفيد ولا يُكبت."],["ديكستروميثورفان","dxm",0,"كبت السعال المنتج قد يحبس البلغم."],["أموكسيسيلين","amox",0,"لا يوجد ما يدل على عدوى بكتيرية، ويحتاج وصفة."],["ديكلوفيناك","diclo",0,"مسكّن ولا يعالج السعال."]]},
+{l:2,k:"إسهال طفل",p:"أم تحضر طفلها (3 سنوات) إسهال مائي منذ يوم ولا يتقيأ كثيراً، يشرب لكنه متعب قليلاً.",o:[["أملاح الإماهة الفموية برشفات متكررة","ors",2,"تعويض السوائل والأملاح هو أساس علاج الإسهال عند الأطفال."],["أموكسيسيلين","amox",0,"الإسهال غالباً فيروسي والمضاد لا يفيد وقد يزيده."],["إيبوبروفين","ibu",0,"لا يعالج المشكلة وقد يزيد خطر الكلى مع الجفاف."],["أسبرين","asa",0,"ممنوع عند الأطفال (متلازمة راي)."]]},
+{l:2,k:"حمى طفل",p:"طفل عمره 4 سنوات ووزنه 16 كغ، حرارته 39 منذ الصباح، يلعب ويشرب، بلا طفح ولا تيبس رقبة.",o:[["باراسيتامول بجرعة 10–15 ملغ/كغ (160–240 ملغ)","para",2,"الخيار الأول للحمى عند الأطفال، مع حساب الجرعة بالوزن."],["إيبوبروفين بجرعة 5–10 ملغ/كغ","ibu",1,"مقبول فوق 6 أشهر، لكن الباراسيتامول أول خيار."],["أسبرين","asa",0,"ممنوع تحت 16 سنة: خطر متلازمة راي."],["ديكستروميثورفان","dxm",0,"لا يخفض الحرارة ولا يناسب عمره."]]},
+{l:2,k:"صداع مع التهاب معدة",p:"رجل 45 سنة، عنده تاريخ التهاب معدة وقرحة سابقة، يطلب مسكّناً للصداع.",o:[["باراسيتامول","para",2,"لطيف على المعدة ولا يسبب نزفاً."],["إيبوبروفين","ibu",0,"يهيّج المعدة وقد يعيد القرحة."],["أسبرين","asa",0,"خطر نزف هضمي مع القرحة."],["ديكلوفيناك","diclo",0,"NSAID يزيد خطر القرحة والنزف."]]},
+{l:2,k:"حساسية بنسلين",p:"مريضة جاءت بوصفة أموكسيسيلين، وتخبرك أنها أُصيبت بطفح وتورم وجه بعد البنسلين قبل سنتين.",o:[["لا أصرف، أتواصل مع الطبيب لبديل مناسب",null,2,"الحساسية الشديدة للبنسلين مانع صريح، والقرار يعود للطبيب لاختيار بديل."],["أصرف الدواء مع مضاد حساسية","amox",0,"مضاد الحساسية لا يمنع صدمة تأقية خطيرة."],["أصرف نصف الجرعة",null,0,"تقليل الجرعة لا يزيل الخطر ويضعف العلاج."],["أصرفه وأطلب منها التوقف إذا ظهر طفح","amox",0,"قد تحدث صدمة قاتلة قبل أن تتوقف."]]},
+{l:3,k:"مزمن متعدد الأدوية",p:"رجل 62 سنة، سكري (ميتفورمين) وضغط مرتفع (أدوية ضغط) وضعف كلى بسيط، يشكو من صداع ويطلب إيبوبروفين لأن جاره ينصح به.",o:[["باراسيتامول","para",2,"الأنسب هنا: الـ NSAIDs ترفع الضغط وتضر الكلى وتتداخل مع أدوية الضغط."],["إيبوبروفين","ibu",0,"يضعف مفعول أدوية الضغط ويزيد خطر تضرر الكلى."],["ديكلوفيناك","diclo",0,"خطر قلبي وكلوي أعلى."],["أسبرين بجرعة مسكنة","asa",0,"ضرر كلوي ونزف دون فائدة إضافية."]]},
+{l:3,k:"تداخل دوائي",p:"وصفة لمريض 70 سنة تحتوي على وارفارين ومعه ديكلوفيناك للألم المفصلي، في العيادة نفسها وبدون ملاحظة من الطبيب.",o:[["أتواصل مع الطبيب لتعديل الوصفة قبل الصرف",null,2,"الجمع بين وارفارين وNSAID يزيد خطر النزف كثيراً، والتعديل قرار الطبيب."],["أصرف الاثنين وأفصل بينهما ساعتين","diclo",0,"التداخل دوائي الديناميكا وليس امتصاصياً، فالفصل لا يلغيه."],["أبدل الديكلوفيناك بإيبوبروفين","ibu",0,"إيبوبروفين NSAID أيضاً ويحمل الخطر نفسه."],["أصرف كما هي وأحذره من النزف","diclo",0,"التحذير لا يكفي، والتداخل يجب حله قبل الصرف."]]},
+{l:3,k:"حمل",p:"سيدة حامل بالأسبوع 28، صداع بسيط، تطلب إيبوبروفين لأنها استخدمته قبل الحمل.",o:[["باراسيتامول مع إخبارها بمراجعة الطبيب إن استمر","para",2,"أكثر المسكنات أماناً في الحمل بأقل جرعة وأقصر مدة."],["إيبوبروفين","ibu",0,"NSAIDs تجنب في الثلث الأخير لخطر على الجنين والكلى وقناة شريانية."],["أسبرين","asa",0,"خطر نزف وتأثير على الجنين."],["ديكلوفيناك","diclo",0,"ممنوع في الثلث الأخير."]]},
+{l:3,k:"علامات خطر",p:"رجل 50 سنة يشكو من أسوأ صداع في حياته ظهر فجأة، مع قيء وتيبس في الرقبة، ويطلب مسكّناً قوياً.",o:[["أنصحه بالذهاب للطوارئ فوراً",null,2,"علامات إنذار (صداع مفاجئ شديد مع قيء وتيبس رقبة) قد تدل على نزف دماغي أو التهاب سحايا."],["باراسيتامول وأطلب منه مراجعة العيادة غداً","para",0,"التأخير قد يكون قاتلاً، والمسكن لا يعالج السبب."],["أسبرين","asa",0,"قد يزيد النزف إن كان دماغياً."],["ديكلوفيناك","diclo",0,"لا يناسب ولا يعالج سبب الحالة."]]}
+];
+
+/* إضافات تعليمية — راجع المعلومات الدوائية محلياً قبل الاستخدام السريري */
+D.push(
+{id:"cetir",n:"سيتريزين (Cetirizine)",t:"زيرتك، سيتريزين",c:"مضاد هيستامين H1",u:"أعراض حساسية الأنف والشرى",x:"الحساسية للدواء؛ تُراجع الجرعة في القصور الكلوي",s:"نعاس، جفاف الفم، تعب",i:"قد يزيد النعاس مع الكحول والمهدئات",d:"البالغ غالباً 10 ملغ مرة يومياً؛ جرعة الأطفال حسب العمر والنشرة",cost:4,pr:9},
+{id:"salb",n:"سالبيوتامول (Salbutamol)",t:"فنتولين",c:"ناهض بيتا-2 قصير المفعول",u:"تخفيف تشنج القصبات حسب خطة علاج الربو",x:"الحساسية للدواء؛ الحذر في بعض اضطرابات القلب",s:"رجفة، خفقان، عصبية",i:"قد يزداد الخفقان مع أدوية محفزة أخرى؛ يحتاج الاستخدام المتكرر لتقييم طبي",d:"تختلف الجرعة حسب الشكل والعمر وخطة الطبيب؛ اتبع الوصفة والنشرة",cost:5,pr:12},
+{id:"lora",n:"لوراتادين (Loratadine)",t:"كلاريتين",c:"مضاد هيستامين H1",u:"أعراض التهاب الأنف التحسسي والشرى",x:"الحساسية للدواء؛ تُراجع الجرعة في أمراض الكبد الشديدة",s:"صداع، تعب، نعاس أحياناً",i:"قد تتداخل بعض الأدوية التي تؤثر في استقلابه",d:"البالغ غالباً 10 ملغ مرة يومياً؛ الأطفال حسب العمر والوزن والنشرة",cost:4,pr:9},
+{id:"azith",n:"أزيثروميسين (Azithromycin)",t:"زيثروماكس",c:"مضاد حيوي من الماكروليدات",u:"بعض العدوى البكتيرية بوصفة وبعد تقييم الطبيب",x:"الحساسية للماكروليدات؛ الحذر مع إطالة QT وأمراض الكبد",s:"غثيان، إسهال، ألم بطني",i:"قد يتداخل مع أدوية تطيل QT وبعض مضادات التخثر",d:"الجرعة والمدة حسب نوع العدوى والوصفة؛ لا يُستخدم للعدوى الفيروسية",cost:9,pr:18},
+{id:"iron",n:"كبريتات الحديد (Ferrous sulfate)",t:"مستحضرات الحديد",c:"مكمل حديد",u:"علاج نقص الحديد المثبت طبياً",x:"زيادة الحديد بالجسم؛ الحذر في اضطرابات تخزين الحديد",s:"إمساك، غثيان، براز داكن",i:"يقل امتصاصه مع مضادات الحموضة والكالسيوم وبعض المضادات الحيوية؛ افصل حسب النشرة",d:"تُحدد الجرعة بحسب كمية الحديد العنصري والحالة والتحاليل",cost:3,pr:8}
+);
+
+
+C.push(
+{l:1,k:"حساسية موسمية",p:"بالغ لديه عطاس وحكة بالأنف خلال موسم الربيع، ولا توجد صعوبة تنفس أو علامات خطرة.",o:[["سيتريزين مع مراجعة النشرة والتنبيه للنعاس","cetir",2,"قد يساعد في أعراض الحساسية؛ يُراعى احتمال النعاس والحالة الصحية."],["أموكسيسيلين","amox",0,"المضاد الحيوي لا يعالج الحساسية."],["وارفارين","warf",0,"مضاد تخثر وليس علاجاً للحساسية."],["ديكلوفيناك","diclo",0,"لا يعالج أعراض الحساسية."]]},
+{l:2,k:"نقص الحديد",p:"مراجع لديه تحليل يؤكد نقص الحديد، ويحمل توصية طبية بمكمل حديد، ويسأل عن طريقة الاستخدام.",o:[["شرح الالتزام بالجرعة الموصوفة وفصلها عن بعض الأدوية حسب النشرة","iron",2,"الجرعة تعتمد على الحديد العنصري، وقد يتأثر الامتصاص بالطعام والأدوية."],["مضاعفة الجرعة لتسريع التحسن","iron",0,"زيادة الجرعة دون توجيه قد تسبب أضراراً وتسمماً."],["إيقاف المتابعة والتحاليل","iron",0,"تحتاج الاستجابة ومخازن الحديد إلى متابعة مناسبة."],["أخذها دائماً مع مضاد الحموضة","antac",0,"مضادات الحموضة قد تقلل امتصاص الحديد."]]},
+{l:3,k:"استخدام بخاخ الربو",p:"مريض ربو يقول إنه يحتاج بخاخ سالبيوتامول مرات أكثر من المعتاد خلال الأيام الأخيرة.",o:[["تقييم عاجل لشدة الأعراض ومراجعة خطة الربو وعدم الاكتفاء بتكرار البخاخ","salb",2,"زيادة الحاجة إلى بخاخ الإنقاذ قد تشير إلى سوء السيطرة وتستدعي تقييماً طبياً."],["طمأنته بأن زيادة الاستخدام طبيعية دائماً","salb",0,"زيادة الاستخدام ليست أمراً يُتجاهل وقد تشير إلى تفاقم الربو."],["صرف مضاد حيوي دون تقييم","azith",0,"لا توجد معلومات تثبت عدوى بكتيرية."],["نصحه بإيقاف كل علاجات الربو","salb",0,"إيقاف العلاج دون خطة قد يكون خطيراً."]]}
+)
+
+var S={m:200,xp:0,rep:50,day:1,n:0,up:0,rev:0,sp:0,ok:0,all:0,st:{},seen:[],cur:null,ord:[],fb:null,tab:"c"};
+D.forEach(function(d){S.st[d.id]=[{q:4,e:40}]});S.st.para.unshift({q:2,e:3});
+function g(id){return D.filter(function(d){return d.id==id})[0]}
+function av(id){return S.st[id].reduce(function(a,b){return a+(b.e>0?b.q:0)},0)}
+function sell(id){var b=S.st[id].filter(function(x){return x.e>0&&x.q>0}).sort(function(a,b){return a.e-b.e})[0];if(b){b.q--;return true}return false}
+function lv(){return S.xp>=120?3:S.xp>=40?2:1}
+function mult(){return 1+S.up*0.2}
+function pick(){var p=C.filter(function(c){return c.l<=lv()&&S.seen.indexOf(c)<0});if(!p.length){S.seen=[];p=C.filter(function(c){return c.l<=lv()})}
+var hi=p.filter(function(c){return c.l==lv()});if(hi.length&&Math.random()<.6)p=hi;S.cur=p[Math.floor(Math.random()*p.length)];S.seen.push(S.cur);
+S.ord=S.cur.o.map(function(_,i){return i}).sort(function(){return Math.random()-.5});S.fb=null}
+function ans(i){var c=S.cur,o=c.o[i],s=o[2],d=o[1]?g(o[1]):null,gain=0,msg="";
+if(d)sell(d.id);S.all++;
+if(s==2){gain=Math.round(((d?d.pr:0)+25)*mult());S.xp+=10;S.rep=Math.min(100,S.rep+4);S.ok++}
+else if(s==1){gain=Math.round(((d?d.pr:0)+10)*mult());S.xp+=4;S.rep=Math.min(100,S.rep+1)}
+else{S.rep-=10}
+S.m+=gain;S.rev+=gain;S.fb={i:i,gain:gain,s:s};beep(s==2);
+S.day++;S.st&&D.forEach(function(x){S.st[x.id].forEach(function(b){b.e--})});S.m-=10;S.sp+=10;render()}
+function nxt(){pick();render()}
+function buy(id){var d=g(id),c=d.cost*5;if(S.m<c){alert("رصيدك لا يكفي");return}S.m-=c;S.sp+=c;S.st[id].push({q:5,e:60});render()}
+function toss(id){var l=0;S.st[id]=S.st[id].filter(function(b){if(b.e<=0&&b.q>0){l+=b.q*g(id).cost;return false}return b.q>0||b.e>0});render()}
+function upg(){var c=300*(S.up+1);if(S.m<c){alert("تحتاج "+c+" د");return}S.m-=c;S.sp+=c;S.up++;render()}
+function tab(t){S.tab=t;render()}
+function reset(){if(confirm("إعادة اللعبة من البداية؟ سيتم حذف التقدم المحفوظ.")){localStorage.removeItem(SAVE_KEY);location.reload()}}
+
+var SAVE_KEY="saydalati_save_v2";
+var UI_LANG=localStorage.getItem("saydalati_lang")||"ar";
+var SOUND_ON=localStorage.getItem("saydalati_sound")==="1";
+function saveGame(){
+  try{localStorage.setItem(SAVE_KEY,JSON.stringify(S));localStorage.setItem("saydalati_saved_at",new Date().toISOString())}catch(e){}
+}
+function loadGame(){
+  try{var raw=localStorage.getItem(SAVE_KEY);if(!raw)return;var old=JSON.parse(raw);
+    if(old&&typeof old.m==="number"&&old.st){S=Object.assign(S,old);D.forEach(function(d){if(!S.st[d.id])S.st[d.id]=[{q:4,e:40}]})}
+  }catch(e){}
+}
+function beep(ok){
+  if(!SOUND_ON)return;
+  try{var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;var a=new AC(),o=a.createOscillator(),g=a.createGain();
+    o.type="sine";o.frequency.value=ok?660:180;g.gain.value=.045;o.connect(g);g.connect(a.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,a.currentTime+.16);o.stop(a.currentTime+.17);o.onended=function(){a.close()}
+  }catch(e){}
+}
+function toggleSound(){SOUND_ON=!SOUND_ON;localStorage.setItem("saydalati_sound",SOUND_ON?"1":"0");render()}
+function toggleLang(){UI_LANG=UI_LANG==="ar"?"en":"ar";localStorage.setItem("saydalati_lang",UI_LANG);document.documentElement.lang=UI_LANG;document.documentElement.dir=UI_LANG==="ar"?"rtl":"ltr";render()}
+function toast(msg){var t=document.getElementById("toast");if(t){t.textContent=msg;t.style.display="block";setTimeout(function(){t.style.display="none"},2200)}}
+function applyUiLanguage(){
+  var nav=document.getElementById("nav");
+  if(UI_LANG==="en"){
+    var labels={"الحالات":"Cases","الموسوعة":"Drug guide","المخزون":"Inventory","التقدم":"Progress"};
+    nav.querySelectorAll("button").forEach(function(b){var sp=b.querySelector("span");var key=b.textContent.trim().replace(sp?sp.textContent:"","").trim();if(labels[key])b.innerHTML=(sp?sp.outerHTML:"")+labels[key]});
+    var tops=document.getElementById("top");
+    tops.innerHTML=tops.innerHTML.replace("مستوى","Level").replace("سمعة","Reputation").replace("يوم","Day");
+    var tools=tops.querySelector(".top-tools");if(tools){tools.querySelector('[data-lang]').textContent="العربية";tools.querySelector('[data-save]').textContent="Saved"}
+  }
+}
+
+function render(){
+var L=lv();document.getElementById("top").innerHTML="<span>💰 <b>"+S.m+"</b></span><span>⭐ مستوى <b>"+L+"</b></span><span>🏥 سمعة <b>"+S.rep+"</b></span><span>📅 يوم <b>"+S.day+"</b></span><div class='top-tools'><button data-lang onclick='toggleLang()'>"+(UI_LANG==="ar"?"English":"العربية")+"</button><button onclick='toggleSound()'>"+(SOUND_ON?"🔊":"🔇")+"</button><button data-save onclick='saveGame();toast(\'تم حفظ التقدم\')'>💾 حفظ</button></div>";
+var T=[["c","🩺","الحالات"],["e","📖","الموسوعة"],["i","📦","المخزون"],["p","🏆","التقدم"]];
+document.getElementById("nav").innerHTML=T.map(function(t){return "<button class='"+(S.tab==t[0]?"on":"")+"' onclick=\"tab('"+t[0]+"')\"><span>"+t[1]+"</span>"+t[2]+"</button>"}).join("");
+var h="";
+if(S.rep<=0){h="<div class='card'><h2>أُغلقت الصيدلية 😔</h2><p>انخفضت سمعتك إلى الصفر بسبب قرارات خاطئة. راجع الشروحات وابدأ من جديد.</p><button class='btn' onclick='reset()'>ابدأ من جديد</button></div>"}
+else if(S.tab=="c"){if(!S.cur)pick();var c=S.cur;
+h="<div class='card'><span class='tag'>مستوى "+c.l+"</span><span class='tag' style='background:var(--mu)'>"+c.k+"</span><p>"+c.p+"</p><div class='mu'>اختر القرار الأنسب للمريض:</div>";
+if(!S.fb){S.ord.forEach(function(i){var o=c.o[i],bad=o[1]&&av(o[1])==0;h+="<button class='opt' "+(bad?"disabled":"")+" onclick='ans("+i+")'>"+o[0]+(bad?" <span class='red'>(نفد من المخزون)</span>":"")+"</button>"});h+="<div class='mu'>الحالة تمر يوماً وتُخصم أجرة 10 د. أي خيار يصرف دواء يستهلك من مخزونك.</div>"}
+else{var f=S.fb,t=f.s==2?"قرار ممتاز ✅":f.s==1?"قرار مقبول ⚠️":"قرار خاطئ ❌";h+="<h3>"+t+(f.gain?" (+"+f.gain+" د)":" (سمعتك انخفضت)")+"</h3>";
+S.ord.forEach(function(i){var o=c.o[i],k=o[2]==2?"best":o[2]==1?"mid":"bad",ic=o[2]==2?"✅":o[2]==1?"⚠️":"❌";h+="<div class='fb "+k+(i==f.i?" pick":"")+"'><b>"+ic+" "+o[0]+(i==f.i?" (اختيارك)":"")+"</b><br>"+o[3]+"</div>"});
+h+="<button class='btn' onclick='nxt()'>الحالة التالية</button>"}
+h+="</div><p class='mu'>لعبة تعليمية؛ لا تغني عن المراجع الطبية أو قرار الصيدلي والطبيب.</p>"}
+else if(S.tab=="e"){h="<input placeholder='ابحث بالاسم العلمي أو التجاري أو التصنيف' oninput='flt(this.value)'>"+D.map(function(d){return "<div class='card dr'><h3>"+d.n+"</h3><div class='mu'>"+d.t+" · "+d.c+"</div><details><summary>التفاصيل</summary><dl class='dl'><dt>الاستعمالات</dt><dd>"+d.u+"</dd><dt>موانع الاستعمال والتحذيرات</dt><dd>"+d.x+"</dd><dt>الآثار الجانبية</dt><dd>"+d.s+"</dd><dt>التداخلات</dt><dd>"+d.i+"</dd><dt>الجرعات المرجعية</dt><dd>"+d.d+"</dd></dl></details></div>"}).join("")}
+else if(S.tab=="i"){h="<div class='card'><h3>مخزون الصيدلية</h3><div class='mu'>الشراء 5 وحدات لكل مرة بصلاحية 60 يوماً. الصرف يبدأ بالأقرب انتهاءً.</div>";
+D.forEach(function(d){var q=av(d.id),ex=S.st[d.id].filter(function(b){return b.e<=0&&b.q>0}).reduce(function(a,b){return a+b.q},0),nr=S.st[d.id].filter(function(b){return b.e>0&&b.q>0}).sort(function(a,b){return a.e-b.e})[0];
+h+="<div class='r'><div><b>"+d.n.split(" (")[0]+"</b><br><span class='mu'>متوفر "+q+(nr?" · ينتهي بعد "+nr.e+" يوم":"")+" · شراء "+d.cost+" / بيع "+d.pr+"</span>"+(ex?"<br><span class='red'>منتهي: "+ex+"</span>":"")+"</div><div>"+(ex?"<button class='btn g s' onclick=\"toss('"+d.id+"')\">إتلاف</button> ":"")+"<button class='btn s' onclick=\"buy('"+d.id+"')\">اشترِ "+d.cost*5+"</button></div></div>"});
+h+="</div><div class='card'><h3>تطوير الصيدلية</h3><p class='mu'>المستوى الحالي: "+S.up+" (أرباح الحالات ×"+mult().toFixed(1)+")</p><button class='btn' onclick='upg()'>توسيع وتحديث بـ "+300*(S.up+1)+" د</button></div>"}
+else{var pc=Math.min(100,L==3?100:L==2?(S.xp-40)/80*100:S.xp/40*100);h="<div class='card'><h3>تقدمك</h3><div class='bar'><i style='width:"+pc+"%'></i></div><p class='mu'>خبرة "+S.xp+(L<3?" · المستوى التالي عند "+(L==1?40:120):" · أقصى مستوى (حالات متقدمة)")+"</p><div class='r'><span>القرارات الممتازة</span><b>"+S.ok+" / "+S.all+"</b></div><div class='r'><span>الدخل</span><b>"+S.rev+"</b></div><div class='r'><span>المصروفات</span><b>"+S.sp+"</b></div><div class='r'><span>صافي الربح</span><b class='"+(S.rev-S.sp<0?"red":"")+"'>"+(S.rev-S.sp)+"</b></div><div class='r'><span>مستوى تطوير الصيدلية</span><b>"+S.up+"</b></div><p class='mu'>المستوى 2 يفتح حالات الأطفال والحساسية، والمستوى 3 يفتح التداخلات والحمل والأمراض المزمنة وعلامات الخطر.</p><button class='btn g' onclick='if(confirm(\"إعادة اللعبة؟\"))reset()'>إعادة اللعبة</button></div>"}
+document.getElementById("app").innerHTML=h;saveGame();applyUiLanguage()}
+function flt(v){v=v.trim().toLowerCase();document.querySelectorAll(".dr").forEach(function(e){e.style.display=e.textContent.toLowerCase().indexOf(v)>-1?"":"none"})}
+loadGame();render();
+</script>
+</body>
+</html>
