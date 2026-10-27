@@ -33,7 +33,7 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v4
 
-           - name: Accept Android SDK licenses
+      - name: Accept Android SDK licenses
         run: yes | sdkmanager --licenses
 
       - name: Install Android SDK packages
@@ -48,7 +48,7 @@ jobs:
           mkdir -p www
           cp index.html www/index.html
           npm init -y
-          npm install @capacitor/core@^7 @capacitor/cli@^7 @capacitor/android@^7
+          npm install @capacitor/core@^7 @capacitor/cli@^7 @capacitor/android@^7 @capacitor-community/admob@^7
 
       - name: Create Capacitor config
         run: |
@@ -59,6 +59,34 @@ jobs:
           if [ ! -d android ]; then
             npx cap add android
           fi
+
+      - name: Configure AdMob
+        run: |
+          mkdir -p android/app/src/main/res/values
+          cat > android/app/src/main/res/values/strings.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <string name="app_name">Saydalati</string>
+              <string name="title_activity_main">Saydalati</string>
+              <string name="package_name">com.saydalati.app</string>
+              <string name="custom_url_scheme">com.saydalati.app</string>
+              <string name="admob_app_id">ca-app-pub-8977777779084791~2041152972</string>
+          </resources>
+          EOF
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path("android/app/src/main/AndroidManifest.xml")
+          s = p.read_text()
+          meta = '<meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="@string/admob_app_id" />'
+
+          if "com.google.android.gms.ads.APPLICATION_ID" not in s:
+              s = re.sub(r'(<application\b[^>]*>)', r'\1\n        ' + meta, s, count=1)
+
+          p.write_text(s)
+          PY
 
       - name: Sync Android
         run: npx cap sync android
