@@ -33,8 +33,15 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v4
 
+           - name: Accept Android SDK licenses
+        run: yes | sdkmanager --licenses
+
       - name: Install Android SDK packages
-        run: sdkmanager "platforms;android-35" "build-tools;35.0.0" "platform-tools"
+        run: |
+          sdkmanager --install \
+            "platforms;android-35" \
+            "build-tools;35.0.0" \
+            "platform-tools"
 
       - name: Prepare web app
         run: |
